@@ -1,4 +1,4 @@
-package io.jenkins.plugins;
+package io.jenkins.plugins.zohoqengine;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -16,15 +16,10 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
 public class QEnginePluginBuilder extends Builder {
-    private String requestUrl;
     private String testPlanUrl;
     private Secret apiKey;
-    private String portalName;
-    private String projectID;
-    private String testPlanID;
     private int maxWaitTime;
     private String buildName;
-    private PrintStream ps;
 
     @DataBoundConstructor
     public QEnginePluginBuilder(String testPlanUrl, String apiKey, int maxWaitTime, String buildName) {
@@ -88,23 +83,11 @@ public class QEnginePluginBuilder extends Builder {
 
     @Override
     public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener) {
-        ps = listener.getLogger();
+        PrintStream ps = listener.getLogger();
+        String requestUrl = null, portalName = null, projectID = null, testPlanID = null;
+
         ps.print("\n************************* QEngine : Start executing the test plan **************************\n");
-        parseAndVerifyParams(listener);
-        // Long runID = CommonUtils.executeTestPlan(testPlanUrl, projectID, testPlanID, buildName, ps);
-        Long runID = CommonUtils.executeTestPlan(this);
-        if (runID != null) {
-            return CommonUtils.getTestPlanStatus(this, runID);
-        } // if(runID != null)
 
-        return false;
-    } // public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener)
-
-    /**
-     * Method to verify build paramas
-     * @param listener
-     */
-    private void parseAndVerifyParams(BuildListener listener) {
         if (Util.fixEmptyAndTrim(testPlanUrl) == null) {
             listener.error("The Test Plan URL is empty.");
         } else {
@@ -112,10 +95,10 @@ public class QEnginePluginBuilder extends Builder {
             if (protocolSplit.length == 2) {
                 String[] resourceSplit = protocolSplit[1].split("/");
                 if (resourceSplit.length == 7) {
-                    this.requestUrl = protocolSplit[0] + "//" + resourceSplit[0];
-                    this.portalName = resourceSplit[1];
-                    this.projectID = resourceSplit[3];
-                    this.testPlanID = resourceSplit[5];
+                    requestUrl = protocolSplit[0] + "//" + resourceSplit[0];
+                    portalName = resourceSplit[1];
+                    projectID = resourceSplit[3];
+                    testPlanID = resourceSplit[5];
                 }
             }
         }
@@ -142,48 +125,48 @@ public class QEnginePluginBuilder extends Builder {
         } // if(maxWaitTime < 0)
 
         buildName = Util.fixEmptyAndTrim(buildName);
-    } // private void parseAndVerifyParams (BuildListener listener)
+
+        Long runID = CommonUtils.executeTestPlan(apiKey, requestUrl, portalName, projectID, testPlanID, buildName, ps);
+        if (runID != null) {
+            return CommonUtils.getTestPlanStatus(apiKey, requestUrl, portalName, projectID, runID, ps, maxWaitTime);
+        } // if(runID != null)
+
+        return false;
+    } // public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener)
 
     /**
-     * @return the portalUrl
+     * Method to verify build paramas
+     * @param listener
+     */
+    private void parseAndVerifyParams(
+            BuildListener listener) {} // private void parseAndVerifyParams (BuildListener listener)
+
+    /**
+     * @return the testPlanUrl
      */
     public String getTestPlanUrl() {
         return testPlanUrl;
     }
 
     /**
-     * @param portalUrl the portalUrl to set
+     * @param testPlanUrl the testPlanUrl to set
      */
-    public void setPortalUrl(String testPlanUrl) {
+    public void setTestPlanUrl(String testPlanUrl) {
         this.testPlanUrl = testPlanUrl;
     }
 
     /**
-     * @return the projectID
+     * @return the apiKey
      */
-    public String getProjectID() {
-        return projectID;
+    public Secret getApiKey() {
+        return this.apiKey;
     }
 
     /**
-     * @param projectID the projectID to set
+     * @param apiKey the apiKey to set
      */
-    public void setProjectID(String projectID) {
-        this.projectID = projectID;
-    }
-
-    /**
-     * @return the testPlanID
-     */
-    public String getTestPlanID() {
-        return testPlanID;
-    }
-
-    /**
-     * @param testPlanID the testPlanID to set
-     */
-    public void setTestPlanID(String testPlanID) {
-        this.testPlanID = testPlanID;
+    public void setApiKey(String apiKey) {
+        this.apiKey = Secret.fromString(apiKey);
     }
 
     /**
@@ -212,37 +195,5 @@ public class QEnginePluginBuilder extends Builder {
      */
     public void setBuildName(String buildName) {
         this.buildName = buildName;
-    }
-
-    public void setPrintStream(PrintStream ps) {
-        this.ps = ps;
-    }
-
-    public PrintStream getPrintStream() {
-        return this.ps;
-    }
-
-    public void setRequestUrl(String requestUrl) {
-        this.requestUrl = requestUrl;
-    }
-
-    public String getRequestUrl() {
-        return this.requestUrl;
-    }
-
-    public void setPortalName(String portalName) {
-        this.portalName = portalName;
-    }
-
-    public String getPortalName() {
-        return this.portalName;
-    }
-
-    public void setApiKey(String apikey) {
-        this.apiKey = Secret.fromString(apikey);
-    }
-
-    public Secret getApiKey() {
-        return this.apiKey;
     }
 }
