@@ -6,11 +6,14 @@ import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
+import hudson.model.Item;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.PrintStream;
+import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
@@ -30,6 +33,7 @@ public class QEnginePluginBuilder extends Builder {
     } // public QEnginePluginBuilder(String portalUrl, Long projectID, Long testPlanID, int maxWaitTime, String
     // buildName)
 
+    @Symbol("ZohoQEngineTestPlanExecution")
     @Extension
     public static class Descriptor extends BuildStepDescriptor<Builder> {
 
@@ -45,6 +49,7 @@ public class QEnginePluginBuilder extends Builder {
 
         @POST
         public FormValidation doCheckTestPlanUrl(@QueryParameter String testPlanUrl) {
+            Jenkins.get().checkPermission(Item.CONFIGURE);
 
             if (Util.fixEmptyAndTrim(testPlanUrl) != null) {
                 String[] protocolSplit = testPlanUrl.split("//");
