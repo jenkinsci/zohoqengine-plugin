@@ -9,6 +9,7 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import java.io.PrintStream;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -17,7 +18,7 @@ import org.kohsuke.stapler.verb.POST;
 public class QEnginePluginBuilder extends Builder {
     private String requestUrl;
     private String testPlanUrl;
-    private String apiKey;
+    private Secret apiKey;
     private String portalName;
     private String projectID;
     private String testPlanID;
@@ -28,7 +29,7 @@ public class QEnginePluginBuilder extends Builder {
     @DataBoundConstructor
     public QEnginePluginBuilder(String testPlanUrl, String apiKey, int maxWaitTime, String buildName) {
         this.testPlanUrl = testPlanUrl;
-        this.apiKey = apiKey;
+        this.apiKey = Secret.fromString(apiKey);
         this.maxWaitTime = maxWaitTime;
         this.buildName = buildName;
     } // public QEnginePluginBuilder(String portalUrl, Long projectID, Long testPlanID, int maxWaitTime, String
@@ -64,7 +65,7 @@ public class QEnginePluginBuilder extends Builder {
 
         @POST
         public FormValidation doCheckApiKey(@QueryParameter String apiKey) {
-            if (Util.fixEmptyAndTrim(apiKey) != null) {
+            if (apiKey != null) {
                 return FormValidation.ok();
             }
             return FormValidation.warning("Please provide a valid API key.");
@@ -119,7 +120,7 @@ public class QEnginePluginBuilder extends Builder {
             }
         }
 
-        if (Util.fixEmptyAndTrim(apiKey) == null) {
+        if (Util.fixEmptyAndTrim(apiKey.getPlainText().trim()) == null) {
             listener.error("The API key is empty.");
         }
 
@@ -238,10 +239,10 @@ public class QEnginePluginBuilder extends Builder {
     }
 
     public void setApiKey(String apikey) {
-        this.apiKey = apikey;
+        this.apiKey = Secret.fromString(apikey);
     }
 
-    public String getApiKey() {
+    public Secret getApiKey() {
         return this.apiKey;
     }
 }

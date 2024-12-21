@@ -22,12 +22,17 @@ public class CommonUtils {
     // public static Long executeTestPlan(String portalUrl, String projectID, String testPlanID, String buildName,
     // PrintStream ps)
     public static Long executeTestPlan(QEnginePluginBuilder pluginBuilder) {
+        String executeUrl = pluginBuilder.getRequestUrl() + QENGINE_API_URL_PREFIX
+                + pluginBuilder.getPortalName() + "/projects/" + pluginBuilder.getProjectID() + "/testplans/"
+                + pluginBuilder.getTestPlanID() + "/execute";
 
-        pluginBuilder.getPrintStream().println("Test Plan Execution URL : " + pluginBuilder.getTestPlanUrl());
+        pluginBuilder.getPrintStream().println("Test Plan Execution URL : " + executeUrl);
 
         HttpClient httpClient = HttpClients.createDefault();
-        HttpPatch patchReq = new HttpPatch(pluginBuilder.getTestPlanUrl());
-        patchReq.addHeader(HttpHeaders.AUTHORIZATION, API_TOKEN + pluginBuilder.getApiKey());
+        HttpPatch patchReq = new HttpPatch(executeUrl);
+        patchReq.addHeader(
+                HttpHeaders.AUTHORIZATION,
+                API_TOKEN + pluginBuilder.getApiKey().getPlainText().trim());
 
         if (pluginBuilder.getBuildName() != null) {
             JSONObject buildJson = new JSONObject();
@@ -81,7 +86,9 @@ public class CommonUtils {
 
             for (int i = 1; i <= pollCount; i++) {
                 HttpGet statusReq = new HttpGet(statusUrl);
-                statusReq.addHeader(HttpHeaders.AUTHORIZATION, API_TOKEN + pluginBuilder.getApiKey());
+                statusReq.addHeader(
+                        HttpHeaders.AUTHORIZATION,
+                        API_TOKEN + pluginBuilder.getApiKey().getPlainText().trim());
                 HttpClient httpClient = HttpClients.createDefault();
                 HttpResponse statusResp = httpClient.execute(statusReq);
 
