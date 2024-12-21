@@ -135,13 +135,6 @@ public class QEnginePluginBuilder extends Builder {
     } // public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener)
 
     /**
-     * Method to verify build paramas
-     * @param listener
-     */
-    private void parseAndVerifyParams(
-            BuildListener listener) {} // private void parseAndVerifyParams (BuildListener listener)
-
-    /**
      * @return the testPlanUrl
      */
     public String getTestPlanUrl() {
