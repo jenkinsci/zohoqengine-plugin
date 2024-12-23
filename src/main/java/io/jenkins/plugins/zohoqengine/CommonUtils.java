@@ -77,7 +77,8 @@ public class CommonUtils {
             String projectID,
             Long runID,
             PrintStream ps,
-            int maxWaitTime) {
+            int maxWaitTime)
+            throws Exception {
         try {
             String statusUrl = requestUrl + QENGINE_API_URL_PREFIX + portalName + "/projects/" + projectID
                     + "/scheduleexecutions/" + runID;
@@ -152,8 +153,8 @@ public class CommonUtils {
             } // for(int i=1; i<= pollCount; i++)
         } // try//try
         catch (Exception ex) {
-            ex.printStackTrace();
             ps.println("Exception occurred while retrieving the Test Plan execution status.");
+            throw ex;
         } // catch (Exception ex)
         ps.println("Unexpected failure. Please refer to the QEngine results page for more details.");
         ps.println("**********************************************************************************************");
@@ -192,7 +193,6 @@ public class CommonUtils {
             } catch (Exception ex) {
                 ps.println("Unable to close inputstream");
             }
-            ;
         } // finally
     } // public static String readContents(InputStream in, PrintStream ps)
 

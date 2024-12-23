@@ -9,7 +9,7 @@
    		<f:textbox field="apiKey" checkMethod="post"/>
    </f:entry>  
    <f:entry title="Maximum Wait Time" field="maxWaitTime">
-   		<f:textbox field="maxWaitTime" default="180" checkMethod="post"/>
+   		<f:number field="maxWaitTime" default="180" checkMethod="post"/>
    </f:entry>
    <f:entry title="Build Name" field="buildName">
    		<f:textbox field="buildName" checkMethod="post"/>

@@ -1,24 +1,26 @@
 package io.jenkins.plugins.zohoqengine;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.BuildListener;
-import hudson.model.Item;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.PrintStream;
-import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.verb.POST;
 
-public class QEnginePluginBuilder extends Builder {
+public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
     private String testPlanUrl;
     private Secret apiKey;
     private int maxWaitTime;
@@ -33,9 +35,18 @@ public class QEnginePluginBuilder extends Builder {
     } // public QEnginePluginBuilder(String portalUrl, Long projectID, Long testPlanID, int maxWaitTime, String
     // buildName)
 
-    @Symbol("ZohoQEngineTestPlanExecution")
+    @Override
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
+    }
+
+    @Symbol("zohoQEngineTestPlanExecution")
     @Extension
-    public static class Descriptor extends BuildStepDescriptor<Builder> {
+    public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
+
+        public DescriptorImpl() {
+            super(QEnginePluginBuilder.class);
+        }
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -47,11 +58,11 @@ public class QEnginePluginBuilder extends Builder {
             return "Zoho QEngine Test Plan Execution";
         } // public String getDisplayName()
 
+        @SuppressWarnings("lgtm[jenkins/no-permission-check]")
         @POST
         public FormValidation doCheckTestPlanUrl(@QueryParameter String testPlanUrl) {
-            Jenkins.get().checkPermission(Item.CONFIGURE);
 
-            if (Util.fixEmptyAndTrim(testPlanUrl) != null) {
+            if (Util.fixEmptyAndTrim(testPlanUrl) != null && testPlanUrl.startsWith("https://")) {
                 String[] protocolSplit = testPlanUrl.split("//");
                 if (protocolSplit.length == 2) {
                     String[] resourceSplit = protocolSplit[1].split("/");
@@ -87,56 +98,69 @@ public class QEnginePluginBuilder extends Builder {
     } // public static class Descriptor extends BuildStepDescriptor<Builder>
 
     @Override
-    public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener) {
+    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) {
         PrintStream ps = listener.getLogger();
         String requestUrl = null, portalName = null, projectID = null, testPlanID = null;
 
         ps.print("\n************************* QEngine : Start executing the test plan **************************\n");
 
-        if (Util.fixEmptyAndTrim(testPlanUrl) == null) {
-            listener.error("The Test Plan URL is empty.");
-        } else {
-            String[] protocolSplit = testPlanUrl.split("//");
-            if (protocolSplit.length == 2) {
-                String[] resourceSplit = protocolSplit[1].split("/");
-                if (resourceSplit.length == 7) {
-                    requestUrl = protocolSplit[0] + "//" + resourceSplit[0];
-                    portalName = resourceSplit[1];
-                    projectID = resourceSplit[3];
-                    testPlanID = resourceSplit[5];
+        try {
+            if (Util.fixEmptyAndTrim(testPlanUrl) == null) {
+                listener.error("The Test Plan URL is empty.");
+            } else {
+                if (!testPlanUrl.startsWith("https://")) {
+                    listener.error("Please check the provided URL.");
+                } else {
+                    String[] protocolSplit = testPlanUrl.split("//");
+                    if (protocolSplit.length == 2) {
+                        String[] resourceSplit = protocolSplit[1].split("/");
+                        if (resourceSplit.length == 7) {
+                            requestUrl = protocolSplit[0] + "//" + resourceSplit[0];
+                            portalName = resourceSplit[1];
+                            projectID = resourceSplit[3];
+                            testPlanID = resourceSplit[5];
+                        }
+                    }
                 }
             }
+
+            if (Util.fixEmptyAndTrim(apiKey.getPlainText().trim()) == null) {
+                listener.error("The API key is empty.");
+            }
+
+            if (Util.fixEmptyAndTrim(requestUrl) == null) {
+                listener.error("Please check the provided URL.");
+            }
+
+            Long projectId = CommonUtils.extractLongValue(projectID);
+            if (projectId == null) {
+                listener.error("Please check the provided URL.");
+            } // if(projectId == null)
+
+            Long testPlanId = CommonUtils.extractLongValue(testPlanID);
+            if (testPlanId == null) {
+                listener.error("Please check the provided URL.");
+            } // if(testPlanId == null)
+            if (maxWaitTime < 0) {
+                maxWaitTime = 180;
+            } // if(maxWaitTime < 0)
+
+            String buildNameStr = Util.fixEmptyAndTrim(buildName) + " - " + run.getNumber();
+
+            Long runID = CommonUtils.executeTestPlan(
+                    apiKey, requestUrl, portalName, projectID, testPlanID, buildNameStr, ps);
+            if (runID != null) {
+                boolean resultStatus = CommonUtils.getTestPlanStatus(
+                        apiKey, requestUrl, portalName, projectID, runID, ps, maxWaitTime);
+                if (resultStatus) {
+                    run.setResult(Result.SUCCESS);
+                } else {
+                    run.setResult(Result.FAILURE);
+                }
+            } // if(runID != null)
+        } catch (Exception e) {
+            run.setResult(Result.FAILURE);
         }
-
-        if (Util.fixEmptyAndTrim(apiKey.getPlainText().trim()) == null) {
-            listener.error("The API key is empty.");
-        }
-
-        if (Util.fixEmptyAndTrim(requestUrl) == null) {
-            listener.error("Please check the provided URL.");
-        }
-
-        Long projectId = CommonUtils.extractLongValue(projectID);
-        if (projectId == null) {
-            listener.error("Please check the provided URL.");
-        } // if(projectId == null)
-
-        Long testPlanId = CommonUtils.extractLongValue(testPlanID);
-        if (testPlanId == null) {
-            listener.error("Please check the provided URL.");
-        } // if(testPlanId == null)
-        if (maxWaitTime < 0) {
-            maxWaitTime = 180;
-        } // if(maxWaitTime < 0)
-
-        buildName = Util.fixEmptyAndTrim(buildName);
-
-        Long runID = CommonUtils.executeTestPlan(apiKey, requestUrl, portalName, projectID, testPlanID, buildName, ps);
-        if (runID != null) {
-            return CommonUtils.getTestPlanStatus(apiKey, requestUrl, portalName, projectID, runID, ps, maxWaitTime);
-        } // if(runID != null)
-
-        return false;
     } // public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener)
 
     /**
