@@ -28,10 +28,10 @@ To get started, install the **Zoho QEngine Test Plan Execution** Plugin in Jenki
 	<p>Include a build step that utilizes the QEngine plugin.</p><br>
 
 3.	**Provide Build Step Details**
-	<p>**Test Plan Execution URL**: Enter the execution URL obtained from Zoho QEngine.</p>
-	<p>**API Key**: Input the API key in Zoho QEngine.</p>
-	<p>**Maximum Wait Time**: Define the maximum expected time (in minutes) for the test plan to complete. If this time is exceeded, the build will terminate and be marked as failed.</p>
-	<p>**Build Name**: Assign a name to the build.</p><br>
+	**<p>Test Plan Execution URL**: Enter the execution URL obtained from Zoho QEngine.</p>
+	**<p>API Key**: Input the API key in Zoho QEngine.</p>
+	**<p>Maximum Wait Time**: Define the maximum expected time (in minutes) for the test plan to complete. If this time is exceeded, the build will terminate and be marked as failed.</p>
+	**<p>Build Name**: Assign a name to the build.</p><br>
 
 4.	**Execute the Build**
 	<p>Trigger the build to initiate test execution.</p>
