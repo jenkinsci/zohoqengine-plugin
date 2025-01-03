@@ -156,7 +156,8 @@ public class CommonUtils {
             ps.println("Exception occurred while retrieving the Test Plan execution status.");
             throw ex;
         } // catch (Exception ex)
-        ps.println("Unexpected failure. Please refer to the QEngine results page for more details.");
+        ps.println(
+                "The test plan failed because the maximum wait time was exceeded, but you can view the execution in Zoho QEngine.");
         ps.println("**********************************************************************************************");
         return false;
     } // public static boolean getTestPlanStatus (String portalUrl, String projectID, int maxWaitTime, Long runID,
