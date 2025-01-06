@@ -27,13 +27,14 @@ public class CommonUtils {
             String projectID,
             String testPlanID,
             String buildName,
-            PrintStream ps) {
+            PrintStream ps)
+            throws Exception {
         try {
 
             String executeUrl = requestUrl + QENGINE_API_URL_PREFIX + portalName + "/projects/" + projectID
                     + "/testplans/" + testPlanID + "/execute";
 
-            ps.println("Test Plan Execution URL : " + executeUrl);
+            // ps.println("Test Plan Execution URL : " + executeUrl);
 
             HttpClient httpClient = ProxyConfiguration.newHttpClient();
             HttpRequest.Builder httpRequest = ProxyConfiguration.newHttpRequestBuilder(new URI(executeUrl));
@@ -64,9 +65,10 @@ public class CommonUtils {
             return runID;
         } // try
         catch (Exception ex) {
-            ps.println("Exception Occurred while initiating Test Plan execution." + ex.getMessage());
+            ps.println("Exception Occurred while initiating Test Plan execution.");
+            throw ex;
         } // catch (Exception ex)
-        return null;
+        // return null;
     } // public static Long executeTestPlan (String portalUrl, String projectID, String testPlanID, String buildName,
     // PrintStream ps)
 
@@ -113,38 +115,38 @@ public class CommonUtils {
 
                     switch (statusStr) {
                         case "queued":
-                            ps.println("Poll#" + i + " Test Plan Execution is in the queue...");
+                            ps.println("Poll #" + i + ": Test Plan Execution is in the queue...");
                             break;
                         case "running":
-                            ps.println("Poll#" + i + " Test Plan Execution is in progress...");
+                            ps.println("Poll #" + i + ": Test Plan Execution is in progress...");
                             break;
                         case "onlyManual":
-                            ps.println("Poll#" + i + " The Test Plan contains only manual cases...");
+                            ps.println("Poll #" + i + ": The Test Plan contains only manual cases...");
                             break;
                         case "stopped":
                         case "terminated":
-                            ps.println("Poll#" + i + " Test Plan Execution has been terminated...");
+                            ps.println("Poll #" + i + ": Test Plan Execution has been terminated...");
                             ps.println(
                                     "**********************************************************************************************");
                             return false;
                         case "completed":
-                            ps.println("Poll#" + i + " Test Plan Execution Completed!!!");
+                            ps.println("Poll #" + i + ": Test Plan Execution has been terminated...");
                             long duration = System.currentTimeMillis() - testPlanStartTime;
                             long durationMin = (duration / 1000 / 60);
                             ps.println("Duration to complete Test Plan Execution: " + durationMin + " minutes...");
-                            ps.println(respJson);
+                            // ps.println(respJson);
                             ps.println(
                                     "**********************************************************************************************");
                             return true;
                         default:
-                            ps.println("Poll#" + i + " Unexpected Execution status - '" + statusStr
+                            ps.println("Poll #" + i + ": Unexpected Execution status - '" + statusStr
                                     + "'. Please refer to the Zoho QEngine results page for further details.");
                             ps.println(
                                     "**********************************************************************************************");
                             return true;
                     } // switch(statusStr)
                     if (i < pollCount) {
-                        ps.println("waiting " + pollingInterval / 1000 + " seconds before next poll..");
+                        ps.println("Waiting " + pollingInterval / 1000 + " seconds before the next poll..");
                         ps.println(
                                 "**********************************************************************************************");
                         Thread.sleep(pollingInterval);
