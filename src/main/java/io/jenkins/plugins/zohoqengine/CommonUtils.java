@@ -130,7 +130,7 @@ public class CommonUtils {
                                     "**********************************************************************************************");
                             return false;
                         case "completed":
-                            ps.println("Poll #" + i + ": Test Plan Execution has been terminated...");
+                            ps.println("Poll #" + i + ": Test Plan Execution has been successfully completed!");
                             long duration = System.currentTimeMillis() - testPlanStartTime;
                             long durationMin = (duration / 1000 / 60);
                             ps.println("Duration to complete Test Plan Execution: " + durationMin + " minutes...");
