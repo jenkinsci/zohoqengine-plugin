@@ -11,7 +11,7 @@
 
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>zohoqengine</artifactId>
-  <version>1.0</version>
+  <version>${revision}.${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Zoho QEngine</name>
@@ -24,13 +24,15 @@
     </license>
   </licenses>
   <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
-    <connection>scm:git:https://github.com/jenkinsci/zohoqengine-plugin</connection>
-    <developerConnection>scm:git:https://github.com/jenkinsci/zohoqengine-plugin</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://github.com/jenkinsci/zohoqengine-plugin</url>
+    <connection>scm:git:https://github.com/${gitHubRepo}</connection>
+    <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
+    <tag>${scmTag}</tag>
+    <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
   <properties>
+    <revision>1.0</revision>
+    <changelist>0-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.version>2.452.4</jenkins.version>
     <gitHubRepo>jenkinsci/zohoqengine-plugin</gitHubRepo>
@@ -53,6 +55,12 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>json-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.10.19</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

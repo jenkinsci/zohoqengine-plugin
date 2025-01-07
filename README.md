@@ -1,16 +1,41 @@
-# QEngine-Jenkins
+# Zoho QEngine
 
-## Introduction
+## About Zoho QEngine
 
-Zoho QEngine - The test automation software to run your entire testing lifecycle
+**Zoho QEngine** is a cloud-based test automation platform designed to streamline software testing for web, API, and mobile applications. With features such as scriptless testing, self-healing capabilities, and detailed reporting, QEngine simplifies quality assurance, enhances efficiency, and ensures robust application performance.
 
-## Description
+For more information, refer to the [help documentation](https://help.zoho.com/portal/en/kb/qengine).
 
-Manage all test cases across platforms in one place, with Zoho QEngine's no-code, low-code as well manual coding features. Create, develop, manage and execute automated functional tests while collaborating with your team. Zoho QEngine's test automation software is everything you need to run your entire testing lifecycle.
+## Jenkins Integration
 
-## Getting started
+Integrating Zoho QEngine with Jenkins enables automated test execution, enhances CI/CD workflows, and provides real-time feedback. This integration improves reporting, fosters collaboration, and accelerates issue detection while supporting scalable and efficient test management.
 
-Please install this plugin to execute Test Plan from Jenkins pipeline. 
+To get started, install the **Zoho QEngine Test Plan Execution** Plugin in Jenkins to trigger test executions.
+
+
+## Pre-requisites for Configuration
+
+- **API Key**: Generate an API Key in Zoho QEngine.
+- **Test Plan Execution URL**: Retrieve the Execution URL from the Test Plans section in Zoho QEngine.
+
+
+## Steps to Configure
+
+1.	**Create a New Pipeline**
+	<p>Set up a new pipeline in Jenkins.</p><br>
+
+2.	**Add a Build Step with the Zoho QEngine Plugin**
+	<p>Include a build step that utilizes the QEngine plugin.</p><br>
+
+3.	**Provide Build Step Details**
+	**<p>Test Plan Execution URL**: Enter the execution URL obtained from Zoho QEngine.</p>
+	**<p>API Key**: Input the API key in Zoho QEngine.</p>
+	**<p>Maximum Wait Time**: Define the maximum expected time (in minutes) for the test plan to complete. If this time is exceeded, the build will terminate and be marked as failed.</p>
+	**<p>Build Name**: Assign a name to the build.</p><br>
+
+4.	**Execute the Build**
+	<p>Trigger the build to initiate test execution.</p>
+
 
 ## Support
 

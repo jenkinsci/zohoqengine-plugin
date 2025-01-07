@@ -76,7 +76,7 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public FormValidation doCheckApiKey(@QueryParameter String apiKey) {
-            if (apiKey != null) {
+            if (Util.fixEmptyAndTrim(apiKey) != null) {
                 return FormValidation.ok();
             }
             return FormValidation.warning("Please provide a valid API key.");
@@ -145,10 +145,14 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
                 maxWaitTime = 180;
             } // if(maxWaitTime < 0)
 
-            String buildNameStr = Util.fixEmptyAndTrim(buildName) + " - " + run.getNumber();
+            String buildDisplayName = Util.fixEmptyAndTrim(buildName);
+            if (buildDisplayName != null) {
+                buildDisplayName = buildDisplayName + " - " + run.getNumber();
+            }
+            ps.println("Final Build Name: " + buildDisplayName);
 
             Long runID = CommonUtils.executeTestPlan(
-                    apiKey, requestUrl, portalName, projectID, testPlanID, buildNameStr, ps);
+                    apiKey, requestUrl, portalName, projectID, testPlanID, buildDisplayName, ps);
             if (runID != null) {
                 boolean resultStatus = CommonUtils.getTestPlanStatus(
                         apiKey, requestUrl, portalName, projectID, runID, ps, maxWaitTime);
