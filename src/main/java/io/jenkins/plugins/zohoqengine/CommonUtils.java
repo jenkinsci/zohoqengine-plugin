@@ -41,28 +41,35 @@ public class CommonUtils {
             httpRequest.setHeader(
                     AUTHORIZATION, API_TOKEN + apiKey.getPlainText().trim());
 
+            JSONObject bodyJson = new JSONObject();
             if (buildName != null) {
                 JSONObject buildJson = new JSONObject();
                 buildJson.put("name", buildName);
 
-                JSONObject bodyJson = new JSONObject();
                 bodyJson.put("testplan", buildJson);
-
-                httpRequest.method("PATCH", BodyPublishers.ofString(bodyJson.toString(), StandardCharsets.UTF_8));
             } // if(buildName != null)
+            httpRequest.method("PATCH", BodyPublishers.ofString(bodyJson.toString(), StandardCharsets.UTF_8));
             HttpResponse<String> httpResponse = httpClient.send(httpRequest.build(), BodyHandlers.ofString());
             int statusCode = httpResponse.statusCode();
             String responseStr = httpResponse.body();
             if (statusCode != 202) {
-                ps.println("Failed to initiate Test Plan execution!");
-                ps.println(responseStr);
-            } // if(statusCode != HttpStatus.SC_ACCEPTED)
+                try {
+                    JSONObject errorJson = new JSONObject(responseStr);
+                    if (errorJson.has("message")) {
+                        ps.println("Failed to initiate Test Plan execution!");
+                        ps.println("Reason : " + errorJson.getString("message"));
+                    }
+                } catch (Exception e) {
+                    throw e;
+                }
+            } else {
+                JSONObject responseJson = new JSONObject(responseStr);
+                Long runID = responseJson.getJSONObject("testplan").getLong("id");
+                ps.println("Run ID\t\t : " + runID);
+                return runID;
+            }
 
-            JSONObject responseJson = new JSONObject(responseStr);
-            Long runID = responseJson.getJSONObject("testplan").getLong("id");
-            ps.println("Run ID\t\t : " + runID);
-
-            return runID;
+            return null;
         } // try
         catch (Exception ex) {
             ps.println("Exception Occurred while initiating Test Plan execution.");
@@ -104,8 +111,16 @@ public class CommonUtils {
                 int statusCode = httpResponse.statusCode();
                 String responseStr = httpResponse.body();
                 if (statusCode != 202) {
-                    ps.println("Unable to retrieve the Test Plan execution status.");
-                    ps.println(responseStr);
+                    try {
+                        JSONObject errorJson = new JSONObject(responseStr);
+                        if (errorJson.has("message")) {
+                            ps.println("Unable to retrieve the Test Plan execution status.");
+                            ps.println("Reason : " + errorJson.getString("message"));
+                        }
+                    } catch (Exception e) {
+                        throw e;
+                    }
+
                     return false;
                 } // if(statusCode != HttpStatus.SC_ACCEPTED)
                 else {
