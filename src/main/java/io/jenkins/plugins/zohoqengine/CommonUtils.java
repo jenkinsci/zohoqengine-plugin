@@ -1,5 +1,6 @@
 package io.jenkins.plugins.zohoqengine;
 
+import hudson.PluginWrapper;
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
 import java.io.IOException;
@@ -13,12 +14,29 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import jenkins.model.Jenkins;
 import org.json.JSONObject;
 
 public class CommonUtils {
     private static final String QENGINE_API_URL_PREFIX = "/api/v1/integration/";
     private static final String API_TOKEN = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
+
+    public static String getQEnginePluginVersion() {
+
+        try {
+            Jenkins jenkins = Jenkins.get();
+            if (jenkins != null) {
+                PluginWrapper plugin = jenkins.getPluginManager().whichPlugin(QEnginePluginBuilder.class);
+                if (plugin != null) {
+                    return "JenkinsPlugin/" + plugin.getVersion();
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return null;
+    }
 
     public static Long executeTestPlan(
             Secret apiKey,
@@ -35,11 +53,15 @@ public class CommonUtils {
                     + "/testplans/" + testPlanID + "/execute";
 
             // ps.println("Test Plan Execution URL : " + executeUrl);
-
             HttpClient httpClient = ProxyConfiguration.newHttpClient();
             HttpRequest.Builder httpRequest = ProxyConfiguration.newHttpRequestBuilder(new URI(executeUrl));
             httpRequest.setHeader(
                     AUTHORIZATION, API_TOKEN + apiKey.getPlainText().trim());
+
+            String userAgent = getQEnginePluginVersion();
+            if (userAgent != null) {
+                httpRequest.setHeader("User-Agent", userAgent);
+            }
 
             JSONObject bodyJson = new JSONObject();
             if (buildName != null) {
@@ -106,6 +128,12 @@ public class CommonUtils {
                 HttpRequest.Builder httpRequest = ProxyConfiguration.newHttpRequestBuilder(new URI(statusUrl));
                 httpRequest.setHeader(
                         AUTHORIZATION, API_TOKEN + apiKey.getPlainText().trim());
+
+                String userAgent = getQEnginePluginVersion();
+                if (userAgent != null) {
+                    httpRequest.setHeader("User-Agent", userAgent);
+                }
+
                 HttpResponse<String> httpResponse =
                         httpClient.send(httpRequest.GET().build(), BodyHandlers.ofString());
                 int statusCode = httpResponse.statusCode();
