@@ -4,13 +4,16 @@
 
 **Zoho QEngine** is a cloud-based test automation platform designed to streamline software testing for web, API, and mobile applications. With features such as scriptless testing, self-healing capabilities, and detailed reporting, QEngine simplifies quality assurance, enhances efficiency, and ensures robust application performance.
 
-For more information, refer to the [help documentation](https://help.zoho.com/portal/en/kb/qengine).
+To learn more about Zoho QEngine, please refer to our [User Guide](https://help.zoho.com/portal/en/kb/qengine/user-guide).
 
 ## Jenkins Integration
 
 Integrating Zoho QEngine with Jenkins enables automated test execution, enhances CI/CD workflows, and provides real-time feedback. This integration improves reporting, fosters collaboration, and accelerates issue detection while supporting scalable and efficient test management.
 
 To get started, install the **Zoho QEngine Test Plan Execution** Plugin in Jenkins to trigger test executions.
+
+For more details about this integration, please refer to the [Integration](https://help.zoho.com/portal/en/kb/qengine/user-guide/setup/integration/articles/integrating-zoho-qengine-with-jenkins) page.
+
 
 
 ## Pre-requisites for Configuration
@@ -39,6 +42,8 @@ To get started, install the **Zoho QEngine Test Plan Execution** Plugin in Jenki
 
 ## Support
 
-Report issues and enhancements to support@zohoqengine.com
+For any issues or further assistance, please contact us at support@zohoqengine.com
+
+To learn more about Zoho QEngine, visit [https://www.zoho.com/qengine/](https://www.zoho.com/qengine/).
 
 

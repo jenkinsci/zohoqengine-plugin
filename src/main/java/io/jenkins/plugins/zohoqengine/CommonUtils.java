@@ -1,5 +1,6 @@
 package io.jenkins.plugins.zohoqengine;
 
+import hudson.PluginWrapper;
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
 import java.io.IOException;
@@ -13,12 +14,29 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import jenkins.model.Jenkins;
 import org.json.JSONObject;
 
 public class CommonUtils {
     private static final String QENGINE_API_URL_PREFIX = "/api/v1/integration/";
     private static final String API_TOKEN = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
+
+    public static String getQEnginePluginVersion() {
+
+        try {
+            Jenkins jenkins = Jenkins.get();
+            if (jenkins != null) {
+                PluginWrapper plugin = jenkins.getPluginManager().whichPlugin(QEnginePluginBuilder.class);
+                if (plugin != null) {
+                    return "JenkinsPlugin/" + plugin.getVersion();
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return null;
+    }
 
     public static Long executeTestPlan(
             Secret apiKey,
@@ -35,34 +53,45 @@ public class CommonUtils {
                     + "/testplans/" + testPlanID + "/execute";
 
             // ps.println("Test Plan Execution URL : " + executeUrl);
-
             HttpClient httpClient = ProxyConfiguration.newHttpClient();
             HttpRequest.Builder httpRequest = ProxyConfiguration.newHttpRequestBuilder(new URI(executeUrl));
             httpRequest.setHeader(
                     AUTHORIZATION, API_TOKEN + apiKey.getPlainText().trim());
 
+            String userAgent = getQEnginePluginVersion();
+            if (userAgent != null) {
+                httpRequest.setHeader("User-Agent", userAgent);
+            }
+
+            JSONObject bodyJson = new JSONObject();
             if (buildName != null) {
                 JSONObject buildJson = new JSONObject();
                 buildJson.put("name", buildName);
 
-                JSONObject bodyJson = new JSONObject();
                 bodyJson.put("testplan", buildJson);
-
-                httpRequest.method("PATCH", BodyPublishers.ofString(bodyJson.toString(), StandardCharsets.UTF_8));
             } // if(buildName != null)
+            httpRequest.method("PATCH", BodyPublishers.ofString(bodyJson.toString(), StandardCharsets.UTF_8));
             HttpResponse<String> httpResponse = httpClient.send(httpRequest.build(), BodyHandlers.ofString());
             int statusCode = httpResponse.statusCode();
             String responseStr = httpResponse.body();
             if (statusCode != 202) {
-                ps.println("Failed to initiate Test Plan execution!");
-                ps.println(responseStr);
-            } // if(statusCode != HttpStatus.SC_ACCEPTED)
+                try {
+                    JSONObject errorJson = new JSONObject(responseStr);
+                    if (errorJson.has("message")) {
+                        ps.println("Failed to initiate Test Plan execution!");
+                        ps.println("Reason : " + errorJson.getString("message"));
+                    }
+                } catch (Exception e) {
+                    throw e;
+                }
+            } else {
+                JSONObject responseJson = new JSONObject(responseStr);
+                Long runID = responseJson.getJSONObject("testplan").getLong("id");
+                ps.println("Run ID\t\t : " + runID);
+                return runID;
+            }
 
-            JSONObject responseJson = new JSONObject(responseStr);
-            Long runID = responseJson.getJSONObject("testplan").getLong("id");
-            ps.println("Run ID\t\t : " + runID);
-
-            return runID;
+            return null;
         } // try
         catch (Exception ex) {
             ps.println("Exception Occurred while initiating Test Plan execution.");
@@ -99,13 +128,27 @@ public class CommonUtils {
                 HttpRequest.Builder httpRequest = ProxyConfiguration.newHttpRequestBuilder(new URI(statusUrl));
                 httpRequest.setHeader(
                         AUTHORIZATION, API_TOKEN + apiKey.getPlainText().trim());
+
+                String userAgent = getQEnginePluginVersion();
+                if (userAgent != null) {
+                    httpRequest.setHeader("User-Agent", userAgent);
+                }
+
                 HttpResponse<String> httpResponse =
                         httpClient.send(httpRequest.GET().build(), BodyHandlers.ofString());
                 int statusCode = httpResponse.statusCode();
                 String responseStr = httpResponse.body();
                 if (statusCode != 202) {
-                    ps.println("Unable to retrieve the Test Plan execution status.");
-                    ps.println(responseStr);
+                    try {
+                        JSONObject errorJson = new JSONObject(responseStr);
+                        if (errorJson.has("message")) {
+                            ps.println("Unable to retrieve the Test Plan execution status.");
+                            ps.println("Reason : " + errorJson.getString("message"));
+                        }
+                    } catch (Exception e) {
+                        throw e;
+                    }
+
                     return false;
                 } // if(statusCode != HttpStatus.SC_ACCEPTED)
                 else {

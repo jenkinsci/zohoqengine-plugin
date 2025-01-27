@@ -66,7 +66,7 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
                 String[] protocolSplit = testPlanUrl.split("//");
                 if (protocolSplit.length == 2) {
                     String[] resourceSplit = protocolSplit[1].split("/");
-                    if (resourceSplit.length == 7) {
+                    if (resourceSplit.length == 6) {
                         return FormValidation.ok();
                     }
                 }
@@ -114,11 +114,26 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
                     String[] protocolSplit = testPlanUrl.split("//");
                     if (protocolSplit.length == 2) {
                         String[] resourceSplit = protocolSplit[1].split("/");
-                        if (resourceSplit.length == 7) {
+                        if (resourceSplit.length == 6) {
                             requestUrl = protocolSplit[0] + "//" + resourceSplit[0];
                             portalName = resourceSplit[1];
                             projectID = resourceSplit[3];
                             testPlanID = resourceSplit[5];
+                        }
+                    }
+                    if (Util.fixEmptyAndTrim(requestUrl) == null) {
+                        listener.error("Please check the provided URL.");
+                    } else {
+
+                        Long projectId = CommonUtils.extractLongValue(projectID);
+                        if (projectId == null) {
+                            listener.error("Please check the provided URL.");
+                        } // if(projectId == null)
+                        else {
+                            Long testPlanId = CommonUtils.extractLongValue(testPlanID);
+                            if (testPlanId == null) {
+                                listener.error("Please check the provided URL.");
+                            } // if(testPlanId == null)
                         }
                     }
                 }
@@ -128,19 +143,6 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
                 listener.error("The API key is empty.");
             }
 
-            if (Util.fixEmptyAndTrim(requestUrl) == null) {
-                listener.error("Please check the provided URL.");
-            }
-
-            Long projectId = CommonUtils.extractLongValue(projectID);
-            if (projectId == null) {
-                listener.error("Please check the provided URL.");
-            } // if(projectId == null)
-
-            Long testPlanId = CommonUtils.extractLongValue(testPlanID);
-            if (testPlanId == null) {
-                listener.error("Please check the provided URL.");
-            } // if(testPlanId == null)
             if (maxWaitTime < 0) {
                 maxWaitTime = 180;
             } // if(maxWaitTime < 0)
@@ -148,8 +150,8 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
             String buildDisplayName = Util.fixEmptyAndTrim(buildName);
             if (buildDisplayName != null) {
                 buildDisplayName = buildDisplayName + " - " + run.getNumber();
+                ps.println("Build Name: " + buildDisplayName);
             }
-            ps.println("Final Build Name: " + buildDisplayName);
 
             Long runID = CommonUtils.executeTestPlan(
                     apiKey, requestUrl, portalName, projectID, testPlanID, buildDisplayName, ps);
@@ -161,7 +163,9 @@ public class QEnginePluginBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     run.setResult(Result.FAILURE);
                 }
-            } // if(runID != null)
+            } else {
+                run.setResult(Result.FAILURE);
+            }
         } catch (Exception e) {
             run.setResult(Result.FAILURE);
         }
