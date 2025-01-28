@@ -32,7 +32,7 @@ For more details about this integration, please refer to the [Integration](https
 
 3.	**Provide Build Step Details**
 	**<p>Test Plan Execution URL**: Enter the execution URL obtained from Zoho QEngine.</p>
-	**<p>API Key**: Input the API key in Zoho QEngine.</p>
+	**<p>API Key**: Input the [API key](https://help.zoho.com/portal/en/kb/qengine/user-guide/setup/api-keys/articles/generate-api-keys-in-zoho-qengine#1_Overview) in Zoho QEngine.</p>
 	**<p>Maximum Wait Time**: Define the maximum expected time (in minutes) for the test plan to complete. If this time is exceeded, the build will terminate and be marked as failed.</p>
 	**<p>Build Name**: Assign a name to the build.</p><br>
 
@@ -44,6 +44,6 @@ For more details about this integration, please refer to the [Integration](https
 
 For any issues or further assistance, please contact us at support@zohoqengine.com
 
-To learn more about Zoho QEngine, visit [https://www.zoho.com/qengine/](https://www.zoho.com/qengine/).
+To know more about Zoho QEngine, visit [https://www.zoho.com/qengine/](https://www.zoho.com/qengine/).
 
 
