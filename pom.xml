@@ -34,7 +34,8 @@
     <revision>1.0</revision>
     <changelist>0-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.version>2.452.4</jenkins.version>
+    <jenkins.baseline>2.452</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
     <gitHubRepo>jenkinsci/zohoqengine-plugin</gitHubRepo>
 
     <spotless.check.skip>false</spotless.check.skip>
@@ -44,7 +45,7 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.452.x</artifactId>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
         <version>3875.v1df09947cde6</version>
         <type>pom</type>
         <scope>import</scope>
