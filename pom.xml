@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.85</version>
+    <version>5.9</version>
     <relativePath />
   </parent>
 
@@ -34,8 +34,8 @@
     <revision>1.0</revision>
     <changelist>0-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.452</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <gitHubRepo>jenkinsci/zohoqengine-plugin</gitHubRepo>
 
     <spotless.check.skip>false</spotless.check.skip>
@@ -46,7 +46,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3875.v1df09947cde6</version>
+        <version>4440.v39a_9eb_b_c6b_4d</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -59,8 +59,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.10.19</version>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
