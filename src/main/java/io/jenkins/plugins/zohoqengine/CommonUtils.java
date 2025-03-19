@@ -26,12 +26,10 @@ public class CommonUtils {
 
         try {
             Jenkins jenkins = Jenkins.get();
-            if (jenkins != null) {
-                PluginWrapper plugin = jenkins.getPluginManager().whichPlugin(QEnginePluginBuilder.class);
-                if (plugin != null) {
-                    return "JenkinsPlugin/" + plugin.getVersion();
-                }
-            }
+	        PluginWrapper plugin = jenkins.getPluginManager().whichPlugin(QEnginePluginBuilder.class);
+	        if (plugin != null) {
+	            return "JenkinsPlugin/" + plugin.getVersion();
+	        }
         } catch (Exception e) {
         }
 
@@ -75,15 +73,11 @@ public class CommonUtils {
             int statusCode = httpResponse.statusCode();
             String responseStr = httpResponse.body();
             if (statusCode != 202) {
-                try {
-                    JSONObject errorJson = new JSONObject(responseStr);
-                    if (errorJson.has("message")) {
-                        ps.println("Failed to initiate Test Plan execution!");
-                        ps.println("Reason : " + errorJson.getString("message"));
-                    }
-                } catch (Exception e) {
-                    throw e;
-                }
+	            JSONObject errorJson = new JSONObject(responseStr);
+	            if (errorJson.has("message")) {
+	                ps.println("Failed to initiate Test Plan execution!");
+	                ps.println("Reason : " + errorJson.getString("message"));
+	            }
             } else {
                 JSONObject responseJson = new JSONObject(responseStr);
                 Long runID = responseJson.getJSONObject("testplan").getLong("id");
@@ -121,7 +115,7 @@ public class CommonUtils {
             long testPlanStartTime = System.currentTimeMillis();
 
             int pollCount = 5;
-            long pollingInterval = (maxWaitTime * 60) / (pollCount - 1) * 1000;
+            long pollingInterval = (maxWaitTime * 60L) / (pollCount - 1) * 1000;
 
             for (int i = 1; i <= pollCount; i++) {
                 HttpClient httpClient = ProxyConfiguration.newHttpClient();
@@ -139,17 +133,13 @@ public class CommonUtils {
                 int statusCode = httpResponse.statusCode();
                 String responseStr = httpResponse.body();
                 if (statusCode != 202) {
-                    try {
-                        JSONObject errorJson = new JSONObject(responseStr);
-                        if (errorJson.has("message")) {
-                            ps.println("Unable to retrieve the Test Plan execution status.");
-                            ps.println("Reason : " + errorJson.getString("message"));
-                        }
-                    } catch (Exception e) {
-                        throw e;
-                    }
+	                JSONObject errorJson = new JSONObject(responseStr);
+	                if (errorJson.has("message")) {
+	                    ps.println("Unable to retrieve the Test Plan execution status.");
+	                    ps.println("Reason : " + errorJson.getString("message"));
+	                }
 
-                    return false;
+	                return false;
                 } // if(statusCode != HttpStatus.SC_ACCEPTED)
                 else {
                     JSONObject respJson = new JSONObject(responseStr);
@@ -218,7 +208,7 @@ public class CommonUtils {
         try {
             char[] buf = new char[500000]; // even number so should not cut off unicode bytes
             StringBuilder sb = new StringBuilder();
-            InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+            InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
             synchronized (in) {
                 int readBytes = 0;
                 while ((readBytes = isr.read(buf, 0, buf.length)) >= 0) {
@@ -249,7 +239,7 @@ public class CommonUtils {
      */
     public static Long extractLongValue(String stringValue) {
         try {
-            Long longValue = Long.valueOf(stringValue);
+            long longValue = Long.parseLong(stringValue);
             if (longValue > 0L) {
                 return longValue;
             } // if(longValue > 0L)
